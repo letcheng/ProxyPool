@@ -48,5 +48,5 @@ proxyPool.reback(httpProxy, HttpStatus.SC_OK); // 使用完成之后，归还 Pr
 proxyPool.allProxyStatus();  // 可以获取 ProxyPool 中所有 Proxy 的当前状态
 ```
 
-
+3. enjoy!
 
