@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class HttpProxy implements Delayed, Serializable {
 
-	private final static long serialVersionUID = 228939737383625551L;
+    private final static long serialVersionUID = 228939737383625551L;
     private final static Logger logger = LoggerFactory.getLogger(HttpProxy.class);
 
     public final static int DEFAULT_REUSE_TIME_INTERVAL = 1500;// ms，从一次请求结束到再次可以请求的默认时间间隔
@@ -31,25 +31,25 @@ public class HttpProxy implements Delayed, Serializable {
     private Proxy proxy;
     private InetAddress localAddr;
 
-	private int reuseTimeInterval = 0;
-	private Long canReuseTime = 0L;  // 当前Proxy可重用的时间,纳秒
+    private int reuseTimeInterval = 0;
+    private Long canReuseTime = 0L;  // 当前Proxy可重用的时间,纳秒
 
-	private int failedNum = 0;
-	private int borrowNum = 0;
+    private int failedNum = 0;
+    private int borrowNum = 0;
 
-    private Map<HttpStatus,Integer> countErrorStatus = new HashMap<HttpStatus, Integer>();
+    private Map<HttpStatus, Integer> countErrorStatus = new HashMap<HttpStatus, Integer>();
 
-    public HttpProxy(String address,int port){
-        this(new Proxy(Proxy.Type.HTTP,new InetSocketAddress(address,port)),0,0,DEFAULT_REUSE_TIME_INTERVAL);
+    public HttpProxy(String address, int port) {
+        this(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(address, port)), 0, 0, DEFAULT_REUSE_TIME_INTERVAL);
     }
 
     public HttpProxy(Proxy proxy) {
-        this(proxy,0,0,DEFAULT_REUSE_TIME_INTERVAL);
+        this(proxy, 0, 0, DEFAULT_REUSE_TIME_INTERVAL);
     }
 
-    public HttpProxy(Proxy proxy,int borrowNum,int failedNum,int reuseTimeInterval){
+    public HttpProxy(Proxy proxy, int borrowNum, int failedNum, int reuseTimeInterval) {
         this.localAddr = IpUtils.getLocalAddr(); // 获取当前机器的ip地址
-        if(localAddr == null){
+        if (localAddr == null) {
             logger.error("cannot get local IP!");
             System.exit(0);
         }
@@ -59,6 +59,7 @@ public class HttpProxy implements Delayed, Serializable {
 
     /**
      * 检查本地机器和Proxy之间的连通性
+     *
      * @return
      */
     public boolean check() {
@@ -70,7 +71,7 @@ public class HttpProxy implements Delayed, Serializable {
             socket.connect(proxy.address(), 3000);
             isReachable = true;
         } catch (Exception e) {
-             logger.error("bad proxy >>>" + this.proxy.toString());
+            logger.error("bad proxy >>>" + this.proxy.toString());
         } finally {
             if (socket != null) {
                 try {
@@ -83,10 +84,10 @@ public class HttpProxy implements Delayed, Serializable {
         return isReachable;
     }
 
-	public void success() {
+    public void success() {
         this.failedNum = 0; //将 failNum 清零
         countErrorStatus.clear();
-	}
+    }
 
     /**
      * 代理失败，记录相应的错误状态码
@@ -94,21 +95,22 @@ public class HttpProxy implements Delayed, Serializable {
      * @param httpStatus
      */
     public void fail(HttpStatus httpStatus) {
-        if(countErrorStatus.containsKey(httpStatus)){
-            countErrorStatus.put(httpStatus,countErrorStatus.get(httpStatus)+1);
-        }else{
-            countErrorStatus.put(httpStatus,1);
+        if (countErrorStatus.containsKey(httpStatus)) {
+            countErrorStatus.put(httpStatus, countErrorStatus.get(httpStatus) + 1);
+        } else {
+            countErrorStatus.put(httpStatus, 1);
         }
         this.failedNum++;
     }
 
     /**
      * 输出错误请求的日志
+     *
      * @return
      */
     public String countErrorStatus() {
         StringBuilder stringBuilder = new StringBuilder();
-        for (Map.Entry<HttpStatus,Integer> entry : countErrorStatus.entrySet()) {
+        for (Map.Entry<HttpStatus, Integer> entry : countErrorStatus.entrySet()) {
             stringBuilder.append(entry.getKey().name()).append("_").append(entry.getKey().getCode()).append("->").append(entry.getValue());
         }
         return stringBuilder.toString();
@@ -117,9 +119,9 @@ public class HttpProxy implements Delayed, Serializable {
     /**
      * 对请求进行计数
      */
-	public void borrow() {
-		this.borrowNum++;
-	}
+    public void borrow() {
+        this.borrowNum++;
+    }
 
     public int getFailedNum() {
         return failedNum;
@@ -134,7 +136,7 @@ public class HttpProxy implements Delayed, Serializable {
         this.canReuseTime = System.nanoTime() + TimeUnit.NANOSECONDS.convert(reuseTimeInterval, TimeUnit.MILLISECONDS);
     }
 
-    public int getReuseTimeInterval(){
+    public int getReuseTimeInterval() {
         return this.reuseTimeInterval;
     }
 
@@ -158,13 +160,13 @@ public class HttpProxy implements Delayed, Serializable {
     @Override
     public String toString() {
         return this.proxy.toString()
-                + ">>> 使用:" + borrowNum +"次 "
+                + ">>> 使用:" + borrowNum + "次 "
                 + ">>> 连续失败:" + failedNum + "次"
-                + ">>> 距离下次可用:"+ TimeUnit.MILLISECONDS.convert(canReuseTime>System.nanoTime()?canReuseTime-System.nanoTime():0,TimeUnit.NANOSECONDS) +" ms后";
+                + ">>> 距离下次可用:" + TimeUnit.MILLISECONDS.convert(canReuseTime > System.nanoTime() ? canReuseTime - System.nanoTime() : 0, TimeUnit.NANOSECONDS) + " ms后";
     }
 
-    public String getKey(){
+    public String getKey() {
         InetSocketAddress address = (InetSocketAddress) proxy.address();
-        return address.getAddress().getHostAddress()+":"+address.getPort();
+        return address.getAddress().getHostAddress() + ":" + address.getPort();
     }
 }

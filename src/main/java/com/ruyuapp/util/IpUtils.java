@@ -22,15 +22,15 @@ public class IpUtils {
         private static final InetAddress localAddr = new IpUtils().init();
     }
 
-    private IpUtils(){
+    private IpUtils() {
 
     }
 
-    public static InetAddress getLocalAddr(){
+    public static InetAddress getLocalAddr() {
         return IpUtilsHolder.localAddr;
     }
 
-    private InetAddress init(){
+    private InetAddress init() {
         try {
             return InetAddress.getLocalHost(); //直接获取IP地址，适应于Windows机器
         } catch (UnknownHostException e) {
@@ -39,7 +39,7 @@ public class IpUtils {
         Enumeration<NetworkInterface> enumeration = null; //遍历所有的网络接口获取
         try {
             enumeration = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException e){
+        } catch (SocketException e) {
             e.printStackTrace();
         }
         while (enumeration != null && enumeration.hasMoreElements()) {

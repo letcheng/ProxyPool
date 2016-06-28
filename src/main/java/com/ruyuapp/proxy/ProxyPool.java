@@ -50,8 +50,8 @@ public class ProxyPool {
         }
     }
 
-    public void add(String address,int port){
-        this.add(new HttpProxy(address,port));
+    public void add(String address, int port) {
+        this.add(new HttpProxy(address, port));
     }
 
     /**
@@ -93,7 +93,7 @@ public class ProxyPool {
             case SC_FORBIDDEN:
                 httpProxy.fail(httpStatus);
                 httpProxy.setReuseTimeInterval(HttpProxy.DEFAULT_REUSE_TIME_INTERVAL * httpProxy.getFailedNum()); // 被网站禁止，调节更长时间的访问频率
-                logger.info(httpProxy.getProxy() + " >>>> reuseTimeInterval is >>>> " + TimeUnit.SECONDS.convert(httpProxy.getReuseTimeInterval(),TimeUnit.MILLISECONDS));
+                logger.info(httpProxy.getProxy() + " >>>> reuseTimeInterval is >>>> " + TimeUnit.SECONDS.convert(httpProxy.getReuseTimeInterval(), TimeUnit.MILLISECONDS));
                 break;
             default:
                 httpProxy.fail(httpStatus);
@@ -127,7 +127,7 @@ public class ProxyPool {
     }
 
     /**
-     *  获取当前空闲的Proxy
+     * 获取当前空闲的Proxy
      *
      * @return
      */
