@@ -24,6 +24,9 @@ public class ProxyPool {
         final ProxyPersistUtils proxyAutoSave = new ProxyPersistUtils();
         // 读取上次的Proxy记录
         this.totalQueue = proxyAutoSave.read();
+        for(Map.Entry<String,HttpProxy> entry : totalQueue.entrySet()){
+            this.idleQueue.add(entry.getValue());
+        }
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
             public void run() {
                 proxyAutoSave.save(totalQueue);
