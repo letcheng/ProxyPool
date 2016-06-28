@@ -15,7 +15,7 @@
 
 ### 使用
 
-1. 添加 Maven 库
+1.添加 Maven 库
 ```
 <repositories>
     <repository>
@@ -33,7 +33,7 @@
 </dependency>
 ```
 
-2. 采取 add(init) -> borrow -> reback 的方式进行使用
+2.采取 add(init) -> borrow -> reback 的方式进行使用
 
 ```java
 ProxyPool proxyPool = new ProxyPool();
