@@ -20,9 +20,8 @@ import java.util.concurrent.TimeUnit;
  * @author <a href="mailto:letcheng@ruyuapp.com">letcheng</a>
  * @version create at 2016年3月27日 10:47
  */
-public class HttpProxy implements Delayed, Serializable {
+public class HttpProxy implements Delayed {
 
-    private final static long serialVersionUID = 228939737383625551L;
     private final static Logger logger = LoggerFactory.getLogger(HttpProxy.class);
 
     public final static int DEFAULT_REUSE_TIME_INTERVAL = 1500;// ms，从一次请求结束到再次可以请求的默认时间间隔
