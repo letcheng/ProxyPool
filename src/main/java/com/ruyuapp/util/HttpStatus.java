@@ -1,5 +1,9 @@
 package com.ruyuapp.util;
 
+/**
+ * @author <a href="mailto:letcheng@ruyuapp.com">letcheng</a>
+ * @version create at 2016年3月27日 10:47
+ */
 public enum HttpStatus {
     SC_CONTINUE(100),
     SC_SWITCHING_PROTOCOLS(101),
