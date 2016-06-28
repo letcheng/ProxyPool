@@ -31,7 +31,7 @@ public class HttpProxy implements Delayed, Serializable {
     private Proxy proxy;
     private InetAddress localAddr;
 
-	private int reuseTimeInterval = DEFAULT_REUSE_TIME_INTERVAL;
+	private int reuseTimeInterval = 0;
 	private Long canReuseTime = 0L;  // 当前Proxy可重用的时间,纳秒
 
 	private int failedNum = 0;
@@ -39,15 +39,23 @@ public class HttpProxy implements Delayed, Serializable {
 
     private Map<HttpStatus,Integer> countErrorStatus = new HashMap<HttpStatus, Integer>();
 
-	public HttpProxy(Proxy proxy) {
+    public HttpProxy(String address,int port){
+        this(new Proxy(Proxy.Type.HTTP,new InetSocketAddress(address,port)),0,0,DEFAULT_REUSE_TIME_INTERVAL);
+    }
+
+    public HttpProxy(Proxy proxy) {
+        this(proxy,0,0,DEFAULT_REUSE_TIME_INTERVAL);
+    }
+
+    public HttpProxy(Proxy proxy,int borrowNum,int failedNum,int reuseTimeInterval){
         this.localAddr = IpUtils.getLocalAddr(); // 获取当前机器的ip地址
         if(localAddr == null){
             logger.error("cannot get local IP!");
             System.exit(0);
         }
         this.proxy = proxy;
-		this.canReuseTime = System.nanoTime() + TimeUnit.NANOSECONDS.convert(reuseTimeInterval, TimeUnit.MILLISECONDS);
-	}
+        this.canReuseTime = System.nanoTime() + TimeUnit.NANOSECONDS.convert(reuseTimeInterval, TimeUnit.MILLISECONDS);
+    }
 
     /**
      * 检查本地机器和Proxy之间的连通性
@@ -61,8 +69,8 @@ public class HttpProxy implements Delayed, Serializable {
             socket.bind(new InetSocketAddress(localAddr, 0));
             socket.connect(proxy.address(), 3000);
             isReachable = true;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+             logger.error("bad proxy >>>" + this.proxy.toString());
         } finally {
             if (socket != null) {
                 try {
@@ -108,7 +116,6 @@ public class HttpProxy implements Delayed, Serializable {
 
     /**
      * 对请求进行计数
-     * @param increment
      */
 	public void borrow() {
 		this.borrowNum++;
@@ -124,6 +131,7 @@ public class HttpProxy implements Delayed, Serializable {
 
     public void setReuseTimeInterval(int reuseTimeInterval) {
         this.reuseTimeInterval = reuseTimeInterval;
+        this.canReuseTime = System.nanoTime() + TimeUnit.NANOSECONDS.convert(reuseTimeInterval, TimeUnit.MILLISECONDS);
     }
 
     public int getReuseTimeInterval(){
@@ -147,4 +155,16 @@ public class HttpProxy implements Delayed, Serializable {
         return unit.convert(canReuseTime - System.nanoTime(), TimeUnit.NANOSECONDS);
     }
 
+    @Override
+    public String toString() {
+        return this.proxy.toString()
+                + ">>> 使用:" + borrowNum +"次 "
+                + ">>> 连续失败:" + failedNum + "次"
+                + ">>> 距离下次可用:"+ TimeUnit.MILLISECONDS.convert(canReuseTime>System.nanoTime()?canReuseTime-System.nanoTime():0,TimeUnit.NANOSECONDS) +" ms后";
+    }
+
+    public String getKey(){
+        InetSocketAddress address = (InetSocketAddress) proxy.address();
+        return address.getAddress().getHostAddress()+":"+address.getPort();
+    }
 }

@@ -3,9 +3,15 @@
  */
 package com.ruyuapp.util;
 
+import com.ruyuapp.proxy.HttpProxy;
+import com.ruyuapp.proxy.ProxyPool;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.SocketAddress;
 
 /**
  * @author <a href="mailto:letcheng@ruyuapp.com">letcheng</a>

@@ -1,7 +1,7 @@
 package com.ruyuapp.proxy;
 
 import com.ruyuapp.util.HttpStatus;
-import com.ruyuapp.util.ProxyAutoSaveUtils;
+import com.ruyuapp.util.ProxyPersistUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,14 +21,14 @@ public class ProxyPool {
     private Map<String, HttpProxy> totalQueue = new ConcurrentHashMap<String, HttpProxy>(); // 存储所有的Proxy
 
     public ProxyPool() {
-        final ProxyAutoSaveUtils proxyAutoSave = new ProxyAutoSaveUtils();
+        final ProxyPersistUtils proxyAutoSave = new ProxyPersistUtils();
         // 读取上次的Proxy记录
         this.totalQueue = proxyAutoSave.read();
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
             public void run() {
                 proxyAutoSave.save(totalQueue);
             }
-        }, 0, 5, TimeUnit.MINUTES); //10分钟执行保存Proxy的操作
+        }, 0, 5, TimeUnit.SECONDS); //10分钟执行保存Proxy的操作
     }
 
     /**
@@ -36,17 +36,22 @@ public class ProxyPool {
      *
      * @param httpProxies
      */
-    private void add(HttpProxy... httpProxies) {
+    public void add(HttpProxy... httpProxies) {
         for (HttpProxy httpProxy : httpProxies) {
-            if (totalQueue.containsKey(httpProxy.getProxy().toString())) {
+            System.out.println(httpProxy.getKey());
+            if (totalQueue.containsKey(httpProxy.getKey())) {
                 continue;
             }
             if (httpProxy.check()) {
                 httpProxy.success();
                 idleQueue.add(httpProxy);
-                totalQueue.put(httpProxy.toString(), httpProxy);
+                totalQueue.put(httpProxy.getKey(), httpProxy);
             }
         }
+    }
+
+    public void add(String address,int port){
+        this.add(new HttpProxy(address,port));
     }
 
     /**
@@ -62,7 +67,7 @@ public class ProxyPool {
             double costTime = (System.currentTimeMillis() - time) / 1000.0;
             logger.info("get proxy time >>>> " + costTime);
 
-            HttpProxy p = totalQueue.get(httpProxy.getProxy().toString());
+            HttpProxy p = totalQueue.get(httpProxy.getKey());
             p.borrow();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -113,12 +118,12 @@ public class ProxyPool {
         }
     }
 
-    public String allProxyStatus() {
+    public void allProxyStatus() {
         String re = "all proxy info >>>> \n";
         for (Entry<String, HttpProxy> entry : totalQueue.entrySet()) {
             re += entry.getValue().toString() + "\n";
         }
-        return re;
+        logger.info(re);
     }
 
     /**
